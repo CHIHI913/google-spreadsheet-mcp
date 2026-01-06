@@ -82,22 +82,6 @@ async function updateValues(spreadsheetId: string, range: string, values: string
   };
 }
 
-async function createSpreadsheet(title: string) {
-  const sheets = await getSheetsClient();
-  const response = await sheets.spreadsheets.create({
-    requestBody: {
-      properties: {
-        title,
-      },
-    },
-  });
-
-  return {
-    spreadsheetId: response.data.spreadsheetId,
-    spreadsheetUrl: response.data.spreadsheetUrl,
-  };
-}
-
 // MCP Server setup
 const server = new McpServer({
   name: "google-sheets-mcp",
@@ -193,30 +177,6 @@ server.registerTool(
   async ({ spreadsheetId, range, values }) => {
     try {
       const result = await updateValues(spreadsheetId, range, values);
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return {
-        content: [{ type: "text", text: `Error: ${errorMessage}` }],
-        isError: true,
-      };
-    }
-  }
-);
-
-server.registerTool(
-  "create_spreadsheet",
-  {
-    description: "Create a new spreadsheet with the given title",
-    inputSchema: {
-      title: z.string().describe("The title of the new spreadsheet"),
-    },
-  },
-  async ({ title }) => {
-    try {
-      const result = await createSpreadsheet(title);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };

@@ -12,6 +12,8 @@ dist/
 credentials.json
 service-account*.json
 *-key.json
+service-accounts/
+.mcp.json
 
 # Logs
 *.log
