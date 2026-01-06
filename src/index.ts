@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { validateCredentials } from "./client.js";
+import { validateAuth } from "./auth.js";
 import { createServer } from "./server.js";
 
 async function main() {
-  // 認証情報の検証
-  console.error("認証情報を検証中...");
-  await validateCredentials();
-  console.error("認証OK");
+  // OAuth認証
+  console.error("認証中...");
+  await validateAuth();
 
   // サーバー起動
   const server = createServer();

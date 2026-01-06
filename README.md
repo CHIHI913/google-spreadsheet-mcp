@@ -41,12 +41,12 @@ Claude Code などの AI エージェントからスプレッドシートの読�
    APIs & Services → Enable APIs → 「Google Sheets API」を検索 → 有効化
    ```
 
-### 2. Service Account 作成
+### 2. OAuth クライアント ID 作成
 
-1. IAM & Admin → Service Accounts → Create Service Account
-2. 名前を入力（例: `sheets-mcp`）→ Create → Done
-3. 作成した Service Account をクリック → Keys → Add Key → Create new key → JSON
-4. ダウンロードした JSON ファイルを安全な場所に保存
+1. APIs & Services → Credentials → Create Credentials → OAuth client ID
+2. アプリケーションの種類: **デスクトップアプリ**
+3. 名前を入力（例: `sheets-mcp`）→ Create
+4. JSON をダウンロード → `credentials/client_secret.json` として保存
 
 ### 3. ビルド
 
@@ -66,23 +66,20 @@ pnpm run build
       "command": "node",
       "args": ["/path/to/google-spreadsheet-mcp/dist/index.js"],
       "env": {
-        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service-account-key.json"
+        "CLIENT_SECRET_PATH": "/path/to/credentials/client_secret.json",
+        "TOKEN_PATH": "/path/to/credentials/token.json"
       }
     }
   }
 }
 ```
 
-### 5. スプレッドシートへのアクセス許可
+### 5. 初回認証
 
-操作したいスプレッドシートを Service Account のメールアドレスに共有してください。
+初回起動時にブラウザが開き、Google アカウントでの認証を求められます。
+認証後、トークンが `TOKEN_PATH` に保存され、以降は自動的に認証されます。
 
-```
-例: sheets-mcp@your-project.iam.gserviceaccount.com
-```
-
-- 読み取りのみ → 閲覧者
-- 編集も行う → 編集者
+> **Note**: 自分の Google アカウントで認証するため、既にアクセス権のあるスプレッドシートはすべて操作可能です。
 
 ## 使用例
 
@@ -136,7 +133,7 @@ https://docs.google.com/spreadsheets/d/【この部分がID】/edit
 
 ## 制限事項
 
-- 新規スプレッドシートの作成は非対応（Service Account の制限）
+- 新規スプレッドシートの作成は非対応
 - 書式設定（フォント、色など）は非対応
 
 ## ライセンス

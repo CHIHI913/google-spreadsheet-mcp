@@ -1,7 +1,7 @@
 // エラーパターンと日本語メッセージのマッピング
 const ERROR_PATTERNS: Array<{ pattern: RegExp; message: string }> = [
   { pattern: /not found/i, message: "スプレッドシートが見つかりません。IDを確認してください" },
-  { pattern: /permission|403/i, message: "アクセス権限がありません。スプレッドシートをService Accountに共有してください" },
+  { pattern: /permission|403/i, message: "アクセス権限がありません。スプレッドシートへのアクセス権を確認してください" },
   { pattern: /invalid_grant|401/i, message: "認証エラー: 認証情報が無効です" },
   { pattern: /ENOTFOUND|network/i, message: "ネットワークエラー: インターネット接続を確認してください" },
 ];

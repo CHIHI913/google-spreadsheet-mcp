@@ -9,10 +9,7 @@ dist/
 .env.*
 
 # Credentials
-credentials.json
-service-account*.json
-*-key.json
-service-accounts/
+credentials/
 .mcp.json
 
 # Logs
