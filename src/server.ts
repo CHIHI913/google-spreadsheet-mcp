@@ -23,6 +23,22 @@ import {
   insertRowsSchema,
   insertColumns,
   insertColumnsSchema,
+  setDropdown,
+  setDropdownSchema,
+  setDropdownRange,
+  setDropdownRangeSchema,
+  setCheckbox,
+  setCheckboxSchema,
+  getValidations,
+  getValidationsSchema,
+  deleteValidation,
+  deleteValidationSchema,
+  addConditionalFormat,
+  addConditionalFormatSchema,
+  getConditionalFormats,
+  getConditionalFormatsSchema,
+  deleteConditionalFormat,
+  deleteConditionalFormatSchema,
 } from "./tools/index.js";
 
 export function createServer(): McpServer {
@@ -142,5 +158,85 @@ function registerTools(server: McpServer): void {
     },
     async ({ spreadsheetId, sheetId, startIndex, numColumns }) =>
       handleToolCall(() => insertColumns(spreadsheetId, sheetId, startIndex, numColumns))
+  );
+
+  server.registerTool(
+    "set_dropdown",
+    {
+      description: "指定範囲にドロップダウンリスト（入力規則）を設定",
+      inputSchema: setDropdownSchema,
+    },
+    async ({ spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, values }) =>
+      handleToolCall(() => setDropdown(spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, values))
+  );
+
+  server.registerTool(
+    "set_dropdown_range",
+    {
+      description: "指定範囲にセル範囲参照のドロップダウンリスト（入力規則）を設定",
+      inputSchema: setDropdownRangeSchema,
+    },
+    async ({ spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, sourceRange }) =>
+      handleToolCall(() => setDropdownRange(spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, sourceRange))
+  );
+
+  server.registerTool(
+    "set_checkbox",
+    {
+      description: "指定範囲にチェックボックス（入力規則）を設定",
+      inputSchema: setCheckboxSchema,
+    },
+    async ({ spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex }) =>
+      handleToolCall(() => setCheckbox(spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex))
+  );
+
+  server.registerTool(
+    "get_validations",
+    {
+      description: "シートの入力規則一覧を取得",
+      inputSchema: getValidationsSchema,
+    },
+    async ({ spreadsheetId, sheetId }) =>
+      handleToolCall(() => getValidations(spreadsheetId, sheetId))
+  );
+
+  server.registerTool(
+    "delete_validation",
+    {
+      description: "指定範囲の入力規則を削除",
+      inputSchema: deleteValidationSchema,
+    },
+    async ({ spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex }) =>
+      handleToolCall(() => deleteValidation(spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex))
+  );
+
+  server.registerTool(
+    "add_conditional_format",
+    {
+      description: "カスタム数式による条件付き書式を追加（数式がtrueの場合に書式を適用）",
+      inputSchema: addConditionalFormatSchema,
+    },
+    async ({ spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, formula, backgroundColor, textColor }) =>
+      handleToolCall(() => addConditionalFormat(spreadsheetId, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, formula, backgroundColor, textColor))
+  );
+
+  server.registerTool(
+    "get_conditional_formats",
+    {
+      description: "シートの条件付き書式ルール一覧を取得",
+      inputSchema: getConditionalFormatsSchema,
+    },
+    async ({ spreadsheetId, sheetId }) =>
+      handleToolCall(() => getConditionalFormats(spreadsheetId, sheetId))
+  );
+
+  server.registerTool(
+    "delete_conditional_format",
+    {
+      description: "指定したインデックスの条件付き書式を削除",
+      inputSchema: deleteConditionalFormatSchema,
+    },
+    async ({ spreadsheetId, sheetId, index }) =>
+      handleToolCall(() => deleteConditionalFormat(spreadsheetId, sheetId, index))
   );
 }
