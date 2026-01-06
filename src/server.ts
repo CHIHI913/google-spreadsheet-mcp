@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { handleToolCall } from "./errors.js";
+import { handleToolCall } from "./handler.js";
 import {
   getSheetMetadata,
   getSheetMetadataSchema,
