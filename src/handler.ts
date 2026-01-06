@@ -1,20 +1,16 @@
+// エラーパターンと日本語メッセージのマッピング
+const ERROR_PATTERNS: Array<{ pattern: RegExp; message: string }> = [
+  { pattern: /not found/i, message: "スプレッドシートが見つかりません。IDを確認してください" },
+  { pattern: /permission|403/i, message: "アクセス権限がありません。スプレッドシートをService Accountに共有してください" },
+  { pattern: /invalid_grant|401/i, message: "認証エラー: 認証情報が無効です" },
+  { pattern: /ENOTFOUND|network/i, message: "ネットワークエラー: インターネット接続を確認してください" },
+];
+
 // エラーメッセージを分かりやすく変換
 export function formatError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
-
-  if (message.includes("not found")) {
-    return "スプレッドシートが見つかりません。IDを確認してください";
-  }
-  if (message.includes("permission") || message.includes("403")) {
-    return "アクセス権限がありません。スプレッドシートをService Accountに共有してください";
-  }
-  if (message.includes("invalid_grant") || message.includes("401")) {
-    return "認証エラー: 認証情報が無効です";
-  }
-  if (message.includes("ENOTFOUND") || message.includes("network")) {
-    return "ネットワークエラー: インターネット接続を確認してください";
-  }
-  return message;
+  const match = ERROR_PATTERNS.find((e) => e.pattern.test(message));
+  return match?.message ?? message;
 }
 
 // ツール実行結果の型
