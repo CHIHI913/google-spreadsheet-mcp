@@ -4,8 +4,6 @@ import * as http from "http";
 import * as url from "url";
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
-const REDIRECT_PORT = 8080;
-const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}/callback`;
 
 interface ClientSecretFile {
   installed?: {
@@ -30,7 +28,15 @@ function getEnvPath(envName: string): string {
   return value;
 }
 
-function loadClientSecret(): { clientId: string; clientSecret: string } {
+function extractPortFromUri(uri: string): number {
+  const match = uri.match(/:(\d+)/);
+  if (match) {
+    return parseInt(match[1], 10);
+  }
+  return 8080; // デフォルトポート
+}
+
+function loadClientSecret(): { clientId: string; clientSecret: string; redirectUri: string } {
   const secretPath = getEnvPath("CLIENT_SECRET_PATH");
 
   if (!fs.existsSync(secretPath)) {
@@ -45,9 +51,13 @@ function loadClientSecret(): { clientId: string; clientSecret: string } {
     throw new Error("クライアントシークレットファイルの形式が不正です");
   }
 
+  // redirect_uriをJSONから取得（なければデフォルト値を使用）
+  const redirectUri = credentials.redirect_uris?.[0] || "http://localhost:8080/callback";
+
   return {
     clientId: credentials.client_id,
     clientSecret: credentials.client_secret,
+    redirectUri,
   };
 }
 
@@ -91,7 +101,7 @@ function openBrowser(authUrl: string): void {
   });
 }
 
-async function getTokenFromWeb(client: OAuth2Client): Promise<Credentials> {
+async function getTokenFromWeb(client: OAuth2Client, port: number): Promise<Credentials> {
   const authUrl = client.generateAuthUrl({
     access_type: "offline",
     scope: SCOPES,
@@ -137,7 +147,7 @@ async function getTokenFromWeb(client: OAuth2Client): Promise<Credentials> {
       }
     });
 
-    server.listen(REDIRECT_PORT, () => {
+    server.listen(port, () => {
       console.error(`\n認証が必要です。ブラウザで以下のURLを開いてください:\n`);
       console.error(authUrl);
       console.error(`\n自動でブラウザを開きます...\n`);
@@ -165,9 +175,10 @@ export async function getAuthClient(): Promise<OAuth2Client> {
     return oauth2Client;
   }
 
-  const { clientId, clientSecret } = loadClientSecret();
+  const { clientId, clientSecret, redirectUri } = loadClientSecret();
+  const port = extractPortFromUri(redirectUri);
 
-  oauth2Client = new OAuth2Client(clientId, clientSecret, REDIRECT_URI);
+  oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUri);
 
   const token = loadToken();
 
@@ -186,14 +197,14 @@ export async function getAuthClient(): Promise<OAuth2Client> {
         oauth2Client.setCredentials(newToken);
       } catch {
         // リフレッシュ失敗時は再認証
-        const newToken = await getTokenFromWeb(oauth2Client);
+        const newToken = await getTokenFromWeb(oauth2Client, port);
         saveToken(newToken);
         oauth2Client.setCredentials(newToken);
       }
     }
   } else {
     // 初回認証
-    const newToken = await getTokenFromWeb(oauth2Client);
+    const newToken = await getTokenFromWeb(oauth2Client, port);
     saveToken(newToken);
     oauth2Client.setCredentials(newToken);
   }
